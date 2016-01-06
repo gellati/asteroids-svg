@@ -8,9 +8,12 @@
   <div id="drawing"></div>
   <button onclick="ship.dy(-5)">Up</button>
   <button onclick="ship.dy(5)">Down</button>
-  <script>
-  var draw = SVG('drawing').size(1200,600)
 
+  <script>
+  var drawing_width = 1200
+  var drawing_height = 600
+  var draw = SVG('drawing').size(drawing_width, drawing_height)
+  var bonus = 10000
   var rocks = []
   var num_rocks = 40
   var rock_size = 20
@@ -22,16 +25,57 @@
   }
 
   var ship = draw.rect(40,20).fill('#aa00aa')
+  var projectiles = []
+
   ship.move(0,300)
+  moveShip()
+  //  shoot()
   loop_forever()
 
+  function moveShip(e){
+    document.onkeydown = function(e){
+      switch (e.keyCode) {
+        case 40: ship.dy(5); break;
+        case 38: ship.dy(-5); break;
+        case 37: ship.dx(-5); break;
+        case 39: ship.dx(5); break;
+        /*
+        case 32: projectiles.push(draw.rect(20, 5).fill('#111111'));
+        np = projectiles.length;
+        projectiles[np].move(ship.cx(), ship.cy()); break;
+        //projectiles[np].x() = ship.x();
+        //projectiles[np].y() = ship.y();
+        //break;
+        */
+      }
+    }
+  }
+
+  function shoot(e){
+    document.onkeydown = function(e){
+      if(e.keyCode == 32){
+        projectiles.push(draw.rect(20, 5).fill('#111111'))
+        np = projectiles.length;
+        projectiles[np].move(ship.x() + 5, ship.y())
+      }
+    }
+  }
+
+
   function loop_forever(){
+    for(var i = 0; i < projectiles.length; i++){
+      projectiles[i].dx(20)
+    }
     for(var i = 0; i < num_rocks; i++){
       rocks[i].dx(-1 * speed/ 1000)
+
       if(rocks[i].x() < 1) rocks[i].move(1200, Math.random() * 600)
-      if(rocks[i].x() < 40 && rocks[i].y() > ship.y() -20 && rocks[i].y() < ship.y() + 20){
+      if(rocks[i].x() > ship.x() && rocks[i].x() < ship.x() + 40 && rocks[i].y() > ship.y() -20 && rocks[i].y() < ship.y() + 20){
         alert("Score: " + speed + ". Reload page to try again.")
         alive = false
+      }
+      if(ship.x() > drawing_width){
+        alert("You passed the asteroid belt. Score: " + (speed + bonus) + ". Reload page to play again.")
       }
     }
     speed++
